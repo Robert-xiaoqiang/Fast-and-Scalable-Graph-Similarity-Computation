@@ -10,14 +10,14 @@ def parameter_parser():
     parser = argparse.ArgumentParser(description="Run SimGNN.")
 
     parser.add_argument("--training-graphs",
-                        nargs="?",
-                        default="./dataset/train/",
-	                help="Folder with training graph pair jsons.")
+                        nargs = "?",
+                        default = "/research/dept7/xqwang/projects/graph-similarity/SimGNN-Pytorch/dataset/train/",
+	                help = "Folder with training graph pair jsons.")
 
     parser.add_argument("--testing-graphs",
-                        nargs="?",
-                        default="./dataset/test/",
-	                help="Folder with testing graph pair jsons.")
+                        nargs = "?",
+                        default = "/research/dept7/xqwang/projects/graph-similarity/SimGNN-Pytorch/dataset/test/",
+	                help = "Folder with testing graph pair jsons.")
 
     parser.add_argument("--epochs",
                         type=int,
