@@ -21,7 +21,7 @@ def parameter_parser():
 
     parser.add_argument("--epochs",
                         type=int,
-                        default=500,
+                        default=5,
 	                help="Number of training epochs. Default is 5.")
 
     parser.add_argument("--filters-1",
@@ -76,8 +76,7 @@ def parameter_parser():
 
     parser.add_argument("--histogram",
                         dest="histogram",
-                        action="store_true")
-
-    parser.set_defaults(histogram=False)
+                        action="store_true",
+                        default = True)
 
     return parser.parse_args()
