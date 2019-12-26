@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 from scipy.sparse import csr_matrix
 
-def adjacence_matrix_from_edge_index(edge_index, v):
+def adjacency_matrix_from_edge_index(edge_index, v):
     '''
         graph(undirected or directed)
 
@@ -36,12 +36,12 @@ def compute_similarity(edge_index_1, prior_1, edge_index_2, prior_2):
                 'update_p': False,  # optional updates of source distribution
                 'lr': 0,
                 'alpha': 0 }
-    adjacence_1 = adjacence_matrix_from_edge_index(edge_index_1)
-    adjacence_2 = adjacence_matrix_from_edge_index(edge_index_2)
+    adjacency_1 = adjacency_matrix_from_edge_index(edge_index_1)
+    adjacency_2 = adjacency_matrix_from_edge_index(edge_index_2)
     idx2node_1 = { i: str(i) for i in range(prior_1) }
     idx2node_2 = { i: str(i) for i in range(prior_2) }
     pairs_idx, pairs_name, pairs_confidence = GwGt.recursive_direct_graph_matching(
-    adjacence_1, adjacence_2, prior_1, prior_2, idx2node_1, idx2node_2, ot_dict,
+    adjacency_1, adjacency_2, prior_1, prior_2, idx2node_1, idx2node_2, ot_dict,
     weights=None, predefine_barycenter=False, cluster_num=2,
     partition_level=3, max_node_num=0)
     return pairs_confidence

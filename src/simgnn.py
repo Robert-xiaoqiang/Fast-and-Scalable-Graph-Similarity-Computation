@@ -9,6 +9,8 @@ from torch_geometric.nn import GCNConv
 from layers import AttentionModule, TenorNetworkModule
 from utils import process_pair, calculate_loss, calculate_normalized_ged
 
+from gwmatching.gwmatching import compute_similarity
+
 class SimGNN(torch.nn.Module):
     """
     SimGNN: A Neural Network Approach to Fast Graph Similarity Computation
@@ -61,14 +63,14 @@ class SimGNN(torch.nn.Module):
     #     hist = hist.view(1, -1)
     #     return hist
 
-    def calculate_histogram(self, nodewise_weights_1, abstract_features_2):
+    def calculate_histogram(self, edge_index_1, nodewise_weights_1, edge_index_2, nodewise_weights_2):
         """
         Calculate histogram from similarity matrix.
-        :param abstract_features_1: Feature matrix for graph 1.
-        :param abstract_features_2: Feature matrix for graph 2.
+        :param nodewise_weights_1: Feature matrix for graph 1.
+        :param nodewise_weights_2: Feature matrix for graph 2.
         :return hist: Histsogram of similarity scores.
         """
-        scores = torch.mm(abstract_features_1, abstract_features_2).detach()
+        scores = torch.from_numpy(compute_similarity(edge_index_1.numpy(), nodewise_weights_1.numpy(), edge_index_2.numpy(), nodewise_weights_2.numpy()))
         scores = scores.view(-1, 1)
         hist = torch.histc(scores, bins=self.args.bins)
         hist = hist/torch.sum(hist)
@@ -121,7 +123,7 @@ class SimGNN(torch.nn.Module):
         scores = torch.t(scores)
 
         if self.args.histogram:
-            hist = self.calculate_histogram(nodewise_weights_1, nodewise_weights_2)
+            hist = self.calculate_histogram(edge_index_1, nodewise_weights_1, edge_index_2, nodewise_weights_2)
 
         if self.args.histogram == True:
             scores = torch.cat((scores, hist), dim=1).view(1, -1)
