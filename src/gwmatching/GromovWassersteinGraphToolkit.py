@@ -12,7 +12,7 @@ recursive graph matching ->
     first do graph partition recursively
     then calculate the Wasserstein barycenter of each sub-graph pair
 """
-import methods.GromovWassersteinFramework as Gwl
+from . import GromovWassersteinFramework as Gwl
 import numpy as np
 from scipy.sparse import csr_matrix
 from typing import List, Dict, Tuple

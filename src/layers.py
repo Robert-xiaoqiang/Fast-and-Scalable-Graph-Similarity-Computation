@@ -37,7 +37,7 @@ class AttentionModule(torch.nn.Module):
         global_context = torch.mean(torch.matmul(embedding, self.weight_matrix), dim=0)
         transformed_global = torch.tanh(global_context)
         sigmoid_scores = torch.sigmoid(torch.mm(embedding, transformed_global.view(-1, 1)))
-        nodewise_weights = sigmoid_scores
+        nodewise_weights = sigmoid_scores / torch.sum(sigmoid_scores)
         representation = torch.mm(torch.t(embedding), sigmoid_scores)
         return representation, nodewise_weights
 

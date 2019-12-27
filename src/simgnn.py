@@ -70,7 +70,7 @@ class SimGNN(torch.nn.Module):
         :param nodewise_weights_2: Feature matrix for graph 2.
         :return hist: Histsogram of similarity scores.
         """
-        scores = torch.from_numpy(compute_similarity(edge_index_1.numpy(), nodewise_weights_1.numpy(), edge_index_2.numpy(), nodewise_weights_2.numpy()))
+        scores = torch.from_numpy(compute_similarity(edge_index_1.numpy(), nodewise_weights_1.detach().numpy(), edge_index_2.numpy(), nodewise_weights_2.detach().numpy()))
         scores = scores.view(-1, 1)
         hist = torch.histc(scores, bins=self.args.bins)
         hist = hist/torch.sum(hist)

@@ -1,4 +1,4 @@
-import .GromovWassersteinGraphToolkit as GwGt
+from . import GromovWassersteinGraphToolkit as GwGt
 import pickle
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -14,7 +14,7 @@ def adjacency_matrix_from_edge_index(edge_index, v):
         return:
         pairwise confidence of matching or similarity
     '''
-    ret = np.zeros(v, v, type = np.float32)
+    ret = np.zeros((v, v), np.float32)
     for i in range(edge_index.shape[1]):
         ret[edge_index[0, i], edge_index[1, i]] = 1.0
     return csr_matrix(ret)
@@ -36,12 +36,15 @@ def compute_similarity(edge_index_1, prior_1, edge_index_2, prior_2):
                 'update_p': False,  # optional updates of source distribution
                 'lr': 0,
                 'alpha': 0 }
-    adjacency_1 = adjacency_matrix_from_edge_index(edge_index_1)
-    adjacency_2 = adjacency_matrix_from_edge_index(edge_index_2)
-    idx2node_1 = { i: str(i) for i in range(prior_1) }
-    idx2node_2 = { i: str(i) for i in range(prior_2) }
-    pairs_idx, pairs_name, pairs_confidence = GwGt.recursive_direct_graph_matching(
-    adjacency_1, adjacency_2, prior_1, prior_2, idx2node_1, idx2node_2, ot_dict,
-    weights=None, predefine_barycenter=False, cluster_num=2,
-    partition_level=3, max_node_num=0)
-    return pairs_confidence
+    adjacency_1 = adjacency_matrix_from_edge_index(edge_index_1, prior_1.shape[0])
+    adjacency_2 = adjacency_matrix_from_edge_index(edge_index_2, prior_2.shape[0])
+    idx2node_1 = { i: str(i) for i in range(prior_1.shape[0]) }
+    idx2node_2 = { i: str(i) for i in range(prior_2.shape[0]) }
+    # pairs_idx, pairs_name, pairs_confidence = GwGt.recursive_direct_graph_matching(
+    # adjacency_1, adjacency_2, prior_1, prior_2, idx2node_1, idx2node_2, ot_dict,
+    # weights=None, predefine_barycenter=False, cluster_num=2,
+    # partition_level=3, max_node_num=0)
+    pairs_idx, pairs_name, pairs_confidence = GwGt.direct_graph_matching(
+        adjacency_1, adjacency_2, prior_1, prior_2, idx2node_1, idx2node_2, ot_dict)
+    print(adjacency_1)
+    return np.ndarray(pairs_confidence)
