@@ -36,6 +36,7 @@ def compute_similarity(edge_index_1, prior_1, edge_index_2, prior_2):
                 'update_p': False,  # optional updates of source distribution
                 'lr': 0,
                 'alpha': 0 }
+    print(prior_1.shape, prior_2.shape)
     adjacency_1 = adjacency_matrix_from_edge_index(edge_index_1, prior_1.shape[0])
     adjacency_2 = adjacency_matrix_from_edge_index(edge_index_2, prior_2.shape[0])
     idx2node_1 = { i: str(i) for i in range(prior_1.shape[0]) }
@@ -46,5 +47,4 @@ def compute_similarity(edge_index_1, prior_1, edge_index_2, prior_2):
     # partition_level=3, max_node_num=0)
     pairs_idx, pairs_name, pairs_confidence = GwGt.direct_graph_matching(
         adjacency_1, adjacency_2, prior_1, prior_2, idx2node_1, idx2node_2, ot_dict)
-    print(adjacency_1)
     return np.ndarray(pairs_confidence)
