@@ -49,19 +49,19 @@ class SimGNN(torch.nn.Module):
                                                      self.args.bottle_neck_neurons)
         self.scoring_layer = torch.nn.Linear(self.args.bottle_neck_neurons, 1)
 
-    # def calculate_histogram(self, abstract_features_1, abstract_features_2):
-    #     """
-    #     Calculate histogram from similarity matrix.
-    #     :param abstract_features_1: Feature matrix for graph 1.
-    #     :param abstract_features_2: Feature matrix for graph 2.
-    #     :return hist: Histsogram of similarity scores.
-    #     """
-    #     scores = torch.mm(abstract_features_1, abstract_features_2).detach()
-    #     scores = scores.view(-1, 1)
-    #     hist = torch.histc(scores, bins=self.args.bins)
-    #     hist = hist/torch.sum(hist)
-    #     hist = hist.view(1, -1)
-    #     return hist
+    def ex_calculate_histogram(self, abstract_features_1, abstract_features_2):
+        """
+        Calculate histogram from similarity matrix.
+        :param abstract_features_1: Feature matrix for graph 1.
+        :param abstract_features_2: Feature matrix for graph 2.
+        :return hist: Histsogram of similarity scores.
+        """
+        scores = torch.mm(abstract_features_1, abstract_features_2).detach()
+        scores = scores.view(-1, 1)
+        hist = torch.histc(scores, bins=self.args.bins)
+        hist = hist/torch.sum(hist)
+        hist = hist.view(1, -1)
+        return hist
 
     def calculate_histogram(self, edge_index_1, nodewise_weights_1, edge_index_2, nodewise_weights_2):
         """
@@ -70,7 +70,7 @@ class SimGNN(torch.nn.Module):
         :param nodewise_weights_2: Feature matrix for graph 2.
         :return hist: Histsogram of similarity scores.
         """
-        scores = torch.from_numpy(compute_similarity(edge_index_1.numpy(), nodewise_weights_1.detach().numpy(), edge_index_2.numpy(), nodewise_weights_2.detach().numpy()))
+        scores = torch.from_numpy(compute_similarity(edge_index_1.numpy(), nodewise_weights_1.data.numpy(), edge_index_2.numpy(), nodewise_weights_2.data.numpy()))
         scores = scores.view(-1, 1)
         hist = torch.histc(scores, bins=self.args.bins)
         hist = hist/torch.sum(hist)
@@ -89,7 +89,7 @@ class SimGNN(torch.nn.Module):
         features = torch.nn.functional.dropout(features,
                                                p=self.args.dropout,
                                                training=self.training)
-
+        # print(features)
         features = self.convolution_2(features, edge_index)
         features = torch.nn.functional.relu(features)
         features = torch.nn.functional.dropout(features,
@@ -109,19 +109,19 @@ class SimGNN(torch.nn.Module):
         edge_index_2 = data["edge_index_2"]
         features_1 = data["features_1"]
         features_2 = data["features_2"]
-
         abstract_features_1 = self.convolutional_pass(edge_index_1, features_1)
         abstract_features_2 = self.convolutional_pass(edge_index_2, features_2)
 
-        # if self.args.histogram == True:
-        #     hist = self.calculate_histogram(abstract_features_1,
-        #                                     torch.t(abstract_features_2))
-
         pooled_features_1, nodewise_weights_1 = self.attention(abstract_features_1)
         pooled_features_2, nodewise_weights_2 = self.attention(abstract_features_2)
+
         scores = self.tensor_network(pooled_features_1, pooled_features_2)
         scores = torch.t(scores)
 
+        # if self.args.histogram:
+        #     hist = self.ex_calculate_histogram(abstract_features_1,
+        #                                     torch.t(abstract_features_2))
+         
         if self.args.histogram:
             hist = self.calculate_histogram(edge_index_1, nodewise_weights_1, edge_index_2, nodewise_weights_2)
 
@@ -231,7 +231,7 @@ class SimGNNTrainer(object):
             data = self.transfer_to_torch(data)
             target = data["target"]
             prediction = self.model(data)
-            losses = losses + torch.nn.functional.mse_loss(data["target"], prediction)
+            losses = losses + torch.nn.functional.mse_loss(prediction.view(-1), data["target"])
         losses.backward(retain_graph=True)
         self.optimizer.step()
         loss = losses.item()

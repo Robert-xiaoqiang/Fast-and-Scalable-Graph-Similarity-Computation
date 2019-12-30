@@ -51,7 +51,7 @@ def parameter_parser():
 
     parser.add_argument("--batch-size",
                         type=int,
-                        default=128,
+                        default=8,
 	                help="Number of graph pairs per batch. Default is 128.")
 
     parser.add_argument("--bins",

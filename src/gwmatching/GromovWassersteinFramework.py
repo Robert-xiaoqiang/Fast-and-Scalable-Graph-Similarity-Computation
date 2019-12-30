@@ -6,6 +6,7 @@ Basic functionalities include:
 2) Gromov-Wasserstein barycenter (for graph matching)
 """
 import numpy as np
+np.seterr(all='print')
 from scipy.sparse import csr_matrix
 from scipy.special import softmax
 from typing import List, Dict, Tuple
@@ -126,7 +127,6 @@ def sinkhorn_knopp_iteration(cost: np.ndarray, p_s: np.ndarray = None, p_t: np.n
     relative_error = np.inf
     b = []
     i = 0
-    # print(a)
     while relative_error > error_bound and i < max_iter:
         b = p_t / (np.matmul(kernel.T, a))
         a_new = p_s / np.matmul(kernel, b)
@@ -170,7 +170,7 @@ def node_cost_st(cost_s: csr_matrix, cost_t: csr_matrix,
         # cost_st = f1(cost_s)*mu_s*1_nt^T + 1_ns*mu_t^T*f2(cost_t)^T
         # cost = cost_st - h1(cost_s)*trans*h2(cost_t)^T
 
-        f1_st = np.repeat(np.matmul(cost_s * np.log(cost_s + 1e-15) - cost_s, p_s), n_t, axis=1)
+        f1_st = np.repeat(np.matmul(cost_s.todense() * np.log(cost_s.todense() + 1e-15) - cost_s.todense(), p_s), n_t, axis=1)
         # f2_st = np.repeat(np.matmul(p_t.T, cost_t.T), n_s, axis=0)
         f2_st = np.repeat((cost_t @ p_t).T, n_s, axis=0)
 
@@ -209,7 +209,7 @@ def node_cost(cost_s: csr_matrix, cost_t: csr_matrix, trans: np.ndarray,
         # cost = cost_st - h1(cost_s)*trans*h2(cost_t)^T
 
         # cost = cost_st - np.matmul(np.matmul(cost_s, trans), (np.log(cost_t + 1e-15)).T)
-        cost = cost_st - np.matmul(cost_s @ trans, (np.log(cost_t + 1e-15)).T)
+        cost = cost_st - np.matmul(cost_s @ trans, (np.log(cost_t.todense() + 1e-15)).T)
     return cost
 
 
